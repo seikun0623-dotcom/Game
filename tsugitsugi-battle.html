@@ -510,8 +510,72 @@
 <header>
   <h1>ツギツギバトル</h1>
   <p>右へ右へとつなげて出して、手札を早くなくそう ― パズル型カード対戦</p>
-  <button class="help-btn" id="helpBtn" title="遊び方">?</button>
 </header>
+
+<div class="modal-overlay" id="modeOverlay">
+  <div class="modal" style="text-align:center;">
+    <h2>対戦相手を選ぶ</h2>
+    <p>CPUと対戦するか、合言葉を使った対人戦（オンライン）を選んでください。</p>
+    <div class="close-row" style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+      <button class="primary" id="modeCpuMainBtn">🤖 CPU戦</button>
+      <button class="primary" id="modeOnlineMainBtn">👥 対人戦</button>
+    </div>
+    <h4 style="margin-top:20px;">どんなカードがあるか</h4>
+    <ul style="text-align:left;">
+      <li>ノーマル：効果のない、フチの形だけのカード。</li>
+      <li>⭐ワイルド：どんなフチとも接続できる万能カード。</li>
+      <li>⏭️封印／📦積み荷／⛓️束縛：相手のターンを止めたり、引かせたりする妨害。</li>
+      <li>🚧封鎖：相手を次のターン、ノーマルカードのみに制限。</li>
+      <li>⚡連撃：もう一度自分のターンを行える。</li>
+      <li>🔮予言：次の自分のターンはフチを無視して接続できる。</li>
+      <li>🎁分け与え／🔀交換：手札を1枚、相手に渡したり交換したりする。</li>
+      <li>🧹整理：手札を好きな枚数選んで引き直す。</li>
+      <li>🔧変形：手札のカードのフチを1枚だけ変化させる。</li>
+      <li>💥反動：自分が山札から2枚引くデメリット効果。</li>
+      <li>🌀変幻：手札にある間、毎ターンフチの形がランダムに変わる。</li>
+    </ul>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="cpuCountOverlay">
+  <div class="modal" style="text-align:center;">
+    <h2>🤖 CPU戦：人数を選ぶ</h2>
+    <div class="close-row" style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+      <button class="primary" id="cpu2pBtn">🤖 2人プレイ</button>
+      <button class="primary" id="cpu4pBtn">🤖🤖🤖 4人プレイ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="onlineCountOverlay">
+  <div class="modal" style="text-align:center;">
+    <h2>👥 対人戦：人数を選ぶ</h2>
+    <p style="font-size:12.5px;">4人プレイは、足りない人数分をCPUが埋めます。</p>
+    <div class="close-row" style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+      <button class="primary" id="online2pBtn">👥 2人プレイ</button>
+      <button class="primary" id="online4pBtn">👥👥👥 4人プレイ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="onlineOverlay">
+  <div class="modal" style="text-align:center;">
+    <h2>合言葉を入力</h2>
+    <p id="onlineIntroText">同じ合言葉を入力した相手とマッチングします。<br><span style="font-size:11px;">※ 公開の中継サーバーを使った簡易オンライン対戦です。合言葉が他の人と重複すると無関係の相手とマッチすることがあります。</span></p>
+    <div id="passphraseSection">
+      <input type="text" id="passphraseInput" placeholder="合言葉" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--panel-line); background:var(--bg); color:var(--ink); font-size:14px; margin-top:8px;">
+      <div class="close-row" style="text-align:center; margin-top:14px;">
+        <button class="primary" id="onlineConnectBtn">接続する</button>
+      </div>
+    </div>
+    <div id="lobbySection" class="hidden" style="margin-top:14px;">
+      <p id="lobbyCount" style="font-weight:700;">参加人数: 1人</p>
+      <button class="primary hidden" id="lobbyStartBtn">🎮 ゲームを開始する</button>
+      <p id="lobbyWaitMsg" class="hidden" style="color:var(--sub); font-size:12.5px;">ホストの開始を待っています…</p>
+    </div>
+    <p id="onlineStatus" style="margin-top:10px; color:var(--sub); font-size:12.5px;"></p>
+  </div>
+</div>
 
 <div id="toastLayer"></div>
 <div id="effectBurstLayer"></div>
@@ -526,10 +590,7 @@
 
   <div class="effect-info" id="effectInfoBar"></div>
 
-  <div class="hand-section" style="padding-bottom:6px;">
-    <h3><span>CPU の手札</span><span id="cpuHandCount">7枚</span></h3>
-    <div class="opp-hand-row" id="cpuHandRow"></div>
-  </div>
+  <div id="oppHandsContainer"></div>
 
   <div class="log-panel" id="logPanel">ゲーム開始！一番右のカードにつなげて、カードを出そう。</div>
 
@@ -546,62 +607,6 @@
     </div>
   </div>
 </main>
-
-<div class="modal-overlay" id="tutorialOverlay">
-  <div class="modal">
-    <h2>ツギツギバトルの遊び方</h2>
-    <p>手札のカードを一列につなげて右へ右へと出していき、誰よりも早く手札をゼロにしたら勝ちです。</p>
-
-    <h4>① カードは右側だけに置ける</h4>
-    <p>カードには「左のフチ」と「右のフチ」があり、それぞれ上・中央・下の3か所に、凸（●）・凹（へこみ）・何もない場所のいずれかがあります。1つしか凸凹が無いカードでも、その位置は上・中央・下のどこにでもなり得ます（真ん中とは限りません）。出せるのは常に一番右に置かれているカードのすぐ右側だけです。一番右のカードの「右のフチ」と、出そうとするカードの「左のフチ」を、上・中央・下の同じ位置どうしで比べ、次のルールで置けるかどうかが決まります。</p>
-    <ul>
-      <li><b>凸は、相手が同じ位置に凹を持っている時しか接続できません。</b>凸どうし、または凸と何もない場所は接続できません。</li>
-      <li>凹どうし、凹と何もない場所、何もない場所どうしは、すべて自由に接続できます。何もない場所は薄いグレーの印で表示され、凹ともきちんと噛み合います。</li>
-    </ul>
-    <div class="mini-key">
-      <span>● 凸（つき出し）</span>
-      <span>◗ 凹（カードに窪んだへこみ）</span>
-      <span>▏何もない場所（フラット）</span>
-    </div>
-    <div class="example-row" id="tutorialExample"></div>
-    <p>上の例では、左のカードの右フチは「上だけに凸」、右のカードの左フチは「上だけに凹」です。上の位置で凸と凹がぴったり噛み合い、他の位置はどちらも何も無いので接続できます。置ける時は右側に緑の枠が出てタップで配置できます。</p>
-
-    <h4>② 特殊カード（このゲームの主役です）</h4>
-    <p>デッキには全部で30種類のカードデザインがあり（ノーマル17種・特殊効果12種・ワイルド1種）、どの種類も同じ枚数ずつ入っています。ノーマルカードだけが多い、ということはありません。さらに、同じ種類のカード（例えば🚧封鎖カード全部）は、フチの凸凹の形もすべて同じです。「いつ・どの効果を使うか」が勝敗を大きく左右します。</p>
-    <ul>
-      <li>⭐ ワイルド：左のフチはどんな相手とも接続できる万能な受け口。ただし最強カードである代償として右のフチは凹寄りの「弱い」形になっており、出した直後の相手（あなたが出した直後ならCPU、CPUが出した直後ならあなた）はつなげやすくなる。</li>
-      <li>⏭️ 封印：相手は次のターンを1回休み。</li>
-      <li>📦 積み荷：相手が山札から2枚引く。</li>
-      <li>⛓️ 束縛：相手は次のターンを1回休みになり、さらに1枚引く（封印＋積み荷の複合効果）。</li>
-      <li>🚧 封鎖：相手は次のターン、ノーマルカードしか出せなくなる。</li>
-      <li>⚡ 連撃：もう一度自分のターンを続けて行える。</li>
-      <li>🔮 予言：次の自分のターンに限り、どんなカードでもフチを無視して接続できる。</li>
-      <li>🎁 分け与え：自分の手札から1枚選んで相手に渡す（下記の専用タイムあり）。自分の手札が1枚減る。</li>
-      <li>🧹 整理：自分の手札から好きな枚数を選んで山札に戻し、同じ枚数を新しく引き直せる（下記の専用タイムあり）。</li>
-      <li>🔧 変形：自分の手札から1枚選び、そのカードのフチの凸凹を新しく変化させる（下記の専用タイムあり）。</li>
-      <li>💥 反動：発動すると、自分自身が山札から2枚引かなければならない（デメリット効果）。</li>
-      <li>♻️ 入れ替え：相手の手札を1枚ランダムに山札へ戻し、新しく1枚引かせる。</li>
-      <li>🧭 先読み：山札の上から2枚を確認できる（自分だけが見られる）。</li>
-      <li>🔀 交換：自分と相手が、それぞれ渡すカードを選んで交換する（下記の専用タイムあり）。</li>
-    </ul>
-    <p>特殊カードにも通常のフチがあるので、置ける時にしか使えません。また、カードのフチには「強さ」のバランスがあります。左のフチは凹→フラット→凸の順で自分が出しやすく、右のフチは凸→フラット→凹の順で相手が出しづらくなります。効果が強力なカードほど、この「形」自体は弱くなるよう作られています（左のフチに凸が混ざって自分が出しにくくなり、右のフチには凹が混ざって出した後は相手がつなげやすくなります）。逆にノーマルカードや軽い効果のカードは、左のフチが凹寄りで出しやすく、右のフチには凸が混ざって相手を詰まらせやすい、扱いやすい「強い」形になっています。⭐ワイルドは効果自体が最強な分、右のフチは凹寄りの弱い形で、出した直後の相手はつなげやすくなります。</p>
-
-    <h4>③ カード選択タイムについて</h4>
-    <p>🔀「交換」や🎁「分け与え」、🧹「整理」、🔧「変形」が発動すると、専用の画面が開きます。カードは必ず本人（あなた、またはCPU）が自分の手札の中から選びます。🧹「整理」だけは複数枚を選んでから「決定」ボタンで確定する形式です。持ち時間は12秒あり、時間切れになるとその時点の選択、または自動でランダムな1枚が選ばれるので、必ず処理は成立します。CPU側の番になると、CPUがしばらく考える演出が入ります。</p>
-
-    <h4>④ ターンの流れ・画面表示</h4>
-    <ul>
-      <li>自分のターンでは、手札から1枚選び、右側の枠をタップして出します。</li>
-      <li>出せるカードが1枚もない場合は「山札を引く」ボタンでカードを引き、ターン終了です。</li>
-      <li>つながったカードが増えてくると、画面には直近の3枚だけが表示され、古いカードは左から順に画面外へ消えていきます。</li>
-      <li>CPUのターンは「考え中」の表示が出てからカードを出します。出したカードは緑（あなた）／青（CPU）の光でハイライトされ、ログにも行動内容が表示されます。</li>
-      <li>手札が0枚になったプレイヤーの勝ちです。</li>
-    </ul>
-    <div class="close-row">
-      <button class="primary" id="tutorialCloseBtn">はじめる</button>
-    </div>
-  </div>
-</div>
 
 <div class="modal-overlay win-modal hidden" id="winOverlay">
   <div class="modal">
@@ -625,9 +630,160 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
 <script>
 (function(){
   "use strict";
+
+  // ---------- online play (public MQTT relay, best-effort) ----------
+  let MY_KEY = 'human', OPP_KEY = 'cpu';
+  const NET = {
+    enabled:false, role:null, client:null, topic:null,
+    myId:Math.random().toString(36).slice(2),
+    seen:new Set(), peerOrder:[], seatPeer:{},
+    pendingPick:null, helloTimer:null, started:false, desiredCount:2
+  };
+  const SEAT_ORDER_4 = ['human','cpu1','cpu2','cpu3'];
+
+  function netSend(msg){
+    if(!NET.client) return;
+    try{ NET.client.publish(NET.topic, JSON.stringify(Object.assign({from:NET.myId}, msg))); }catch(e){}
+  }
+  function broadcastState(){
+    if(NET.enabled && NET.role === 'host' && NET.started) netSend({type:'state', state});
+  }
+  function requestRemotePick(seat, title, prompt, multi, finishFn){
+    NET.pendingPick = finishFn;
+    netSend({type:'pickerRequest', seat, title, prompt, multi});
+  }
+  function localPlayOrRequest(idx){
+    if(NET.enabled && NET.role === 'guest'){ netSend({type:'action', action:'play', idx, seat:MY_KEY}); }
+    else { playCard(MY_KEY, idx); }
+  }
+  function localDrawOrRequest(){
+    if(NET.enabled && NET.role === 'guest'){ netSend({type:'action', action:'draw', seat:MY_KEY}); }
+    else { performForcedDraw(MY_KEY); }
+  }
+  function updateLobbyUI(){
+    const count = NET.seen.size + 1;
+    document.getElementById('lobbyCount').textContent = '参加人数: ' + count + '人（最大' + NET.desiredCount + '人）';
+    const startBtn = document.getElementById('lobbyStartBtn');
+    const waitMsg = document.getElementById('lobbyWaitMsg');
+    if(NET.role === 'host'){
+      startBtn.classList.remove('hidden');
+      startBtn.disabled = count < 2;
+      waitMsg.classList.add('hidden');
+    } else {
+      startBtn.classList.add('hidden');
+      waitMsg.classList.remove('hidden');
+    }
+  }
+  function showLobby(){
+    document.getElementById('passphraseSection').classList.add('hidden');
+    document.getElementById('lobbySection').classList.remove('hidden');
+    document.getElementById('onlineStatus').textContent = '';
+    updateLobbyUI();
+  }
+  function hostStartGame(){
+    if(NET.role !== 'host') return;
+    const n = NET.desiredCount || 2;
+    const seatOrder = (n > 2) ? SEAT_ORDER_4 : ['human','cpu'];
+    const realPeers = NET.peerOrder.slice(0, n - 1);
+    const seatIsAI = {};
+    seatOrder.forEach((seat, i)=>{
+      if(seat === 'human') return;
+      const peer = realPeers[i-1];
+      if(peer){ NET.seatPeer[seat] = peer; seatIsAI[seat] = false; }
+      else { seatIsAI[seat] = true; }
+    });
+    newGame(n, n > 2);
+    state.seatIsAI = seatIsAI;
+    NET.started = true;
+    document.getElementById('onlineOverlay').classList.add('hidden');
+    document.getElementById('modeOverlay').classList.add('hidden');
+    const seatMap = {};
+    Object.keys(NET.seatPeer).forEach(seat=>{ seatMap[NET.seatPeer[seat]] = seat; });
+    netSend({type:'assignSeat', seatMap, state});
+    render(false);
+  }
+  function handleNetMessage(msg){
+    if(msg.type === 'hello'){
+      if(!NET.seen.has(msg.from)){ NET.seen.add(msg.from); NET.peerOrder.push(msg.from); }
+      if(!NET.role){
+        const ids = Array.from(NET.seen).concat([NET.myId]);
+        if(ids.length >= 2){
+          ids.sort();
+          clearInterval(NET.helloTimer);
+          NET.role = (ids[0] === NET.myId) ? 'host' : 'guest';
+          MY_KEY = 'human'; OPP_KEY = 'cpu';
+          NET.enabled = true;
+          showLobby();
+        }
+      } else if(!NET.started){
+        updateLobbyUI();
+      }
+      return;
+    }
+    if(msg.type === 'assignSeat' && NET.role === 'guest' && !NET.started){
+      const seat = msg.seatMap[NET.myId];
+      if(!seat) return;
+      MY_KEY = seat;
+      state = msg.state;
+      NET.started = true;
+      document.getElementById('onlineOverlay').classList.add('hidden');
+      document.getElementById('modeOverlay').classList.add('hidden');
+      render(false);
+      return;
+    }
+    if(msg.type === 'state'){
+      if(NET.role === 'guest' && NET.started){
+        state = msg.state;
+        render(false);
+      }
+      return;
+    }
+    if(msg.type === 'action' && NET.role === 'host' && NET.started){
+      const seat = msg.seat;
+      if(seat && state && state.current === seat && NET.seatPeer[seat] === msg.from){
+        if(msg.action === 'play') playCard(seat, msg.idx);
+        else if(msg.action === 'draw' && state.mustDraw) performForcedDraw(seat);
+      }
+      return;
+    }
+    if(msg.type === 'pickerRequest' && NET.role === 'guest' && msg.seat === MY_KEY){
+      openCardPicker(MY_KEY, msg.title, msg.prompt, (result)=>{ netSend({type:'pickerResult', result}); }, {multi: msg.multi});
+      return;
+    }
+    if(msg.type === 'pickerResult' && NET.role === 'host' && NET.pendingPick){
+      const cb = NET.pendingPick; NET.pendingPick = null;
+      cb(msg.result);
+      return;
+    }
+  }
+  function startOnlineMatch(passphrase){
+    const statusEl = document.getElementById('onlineStatus');
+    statusEl.textContent = '接続中…';
+    NET.topic = 'tsugitsugi-battle-v1/' + encodeURIComponent(passphrase.trim().toLowerCase());
+    try{
+      const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+      NET.client = client;
+      client.on('connect', ()=>{
+        client.subscribe(NET.topic);
+        statusEl.textContent = '相手を探しています…（同じ合言葉を入力した相手を待っています）';
+        NET.helloTimer = setInterval(()=> netSend({type:'hello'}), 1200);
+        netSend({type:'hello'});
+      });
+      client.on('message', (t, payload)=>{
+        let msg; try{ msg = JSON.parse(payload.toString()); }catch(e){ return; }
+        if(msg.from === NET.myId) return;
+        handleNetMessage(msg);
+      });
+      client.on('error', ()=>{ statusEl.textContent = '接続に失敗しました。回線を確認してもう一度お試しください。'; });
+    }catch(e){
+      statusEl.textContent = 'オンライン対戦を開始できませんでした。';
+    }
+  }
+
 
   const EFFECTS = {
     skip:      {label:'封印',     icon:'⏭️', desc:'相手は次のターンを1回休みになる'},
@@ -640,14 +796,11 @@
     reorganize:{label:'整理',     icon:'🧹', desc:'自分の手札から好きな枚数を選んで山札に戻し、同じ枚数を新しく引き直せる'},
     reshape:   {label:'変形',     icon:'🔧', desc:'自分の手札から1枚選び、そのカードのフチの凸凹を新しく変化させる'},
     backlash:  {label:'反動',     icon:'💥', desc:'発動すると、自分が山札から2枚引かなければならない（デメリット効果）'},
-    reroll:    {label:'入れ替え', icon:'♻️', desc:'相手の手札を1枚ランダムに山札へ戻し、新しく1枚引かせる'},
-    foresight: {label:'先読み',   icon:'🧭', desc:'山札の上から2枚を確認できる（自分だけが見られる）'},
     swap:      {label:'交換',     icon:'🔀', desc:'自分と相手がそれぞれ渡すカードを選び、手札を交換する'}
   };
   const EFFECT_TONE = {
-    skip:'danger', draw2:'danger', bind:'danger', blockade:'danger', reroll:'danger', backlash:'danger',
-    extra:'good', prophecy:'good', gift:'good', swap:'good', reorganize:'good', reshape:'good',
-    foresight:'info'
+    skip:'danger', draw2:'danger', bind:'danger', blockade:'danger', backlash:'danger',
+    extra:'good', prophecy:'good', gift:'good', swap:'good', reorganize:'good', reshape:'good'
   };
   const EFFECT_KEYS = Object.keys(EFFECTS);
   const VISIBLE_COUNT = 3;
@@ -664,16 +817,26 @@
     return arr;
   }
   function other(p){ return p === 'human' ? 'cpu' : 'human'; }
-  function label(p){ return p === 'human' ? 'あなた' : 'CPU'; }
+  // 手番順(state.order)上で、自分の次にターンが来るプレイヤーを返す。
+  // 2人対戦なら other(p) と同じ結果になる。
+  function nextSeat(p){
+    if(!state || !state.order || state.order.length < 2) return other(p);
+    const idx = state.order.indexOf(p);
+    if(idx === -1) return other(p);
+    return state.order[(idx + 1) % state.order.length];
+  }
+  function label(p){ return displayName(p); }
 
   // ---------- card / edge model ----------
-  function randomSide(tabProb, socketProb){
-    tabProb = (tabProb === undefined) ? 0.18 : tabProb;
-    socketProb = (socketProb === undefined) ? 0.28 : socketProb;
+  // 左のフチは凹(socket)かフラットのみ、右のフチは凸(tab)かフラットのみ。
+  // side: 'left' なら凹/フラット、'right' なら凸/フラットを生成する。
+  function randomSide(side, prob){
+    prob = (prob === undefined) ? 0.35 : prob;
+    const fill = (side === 'right') ? 'tab' : 'socket';
     const teeth = [];
-    for(let i=0;i<3;i++){
-      const r = Math.random();
-      teeth.push(r < tabProb ? 'tab' : (r < tabProb + socketProb ? 'socket' : 'empty'));
+    for(let i=0;i<3;i++) teeth.push(Math.random() < prob ? fill : 'empty');
+    if(teeth.every(t => t === 'empty')){
+      teeth[Math.floor(Math.random()*3)] = fill;
     }
     return { any:false, teeth };
   }
@@ -682,38 +845,30 @@
     return side.any ? { any:true, teeth:[] } : { any:false, teeth: side.teeth.slice() };
   }
 
-  // 強いカードほど「形」自体は弱くする(左は出しにくく、右は相手が出しやすい)ための
-  // 強さテーブル。数値が大きいほど強力な効果とみなす。
+  // 弱い効果ほど、左の凹・右の凸の「数」を多くする(繋げやすい強い形)。
+  // 強い効果ほど数を減らす(フラットが増え、繋げにくい弱い形)。
   const NORMAL_POWER = 0;
   const WILD_POWER = 6;
-  const MAX_POWER = 6;
   const EFFECT_POWER = {
     backlash:0,                          // デメリットのみ = 最弱(その分とても出しやすい形)
-    foresight:1,                         // 情報系・軽い効果 = 弱め
-    reorganize:2, reroll:2, gift:2,      // それなりに便利な効果 = 中程度
+    reorganize:1, gift:2,      // それなりに便利な効果 = 中程度
     blockade:3, swap:3, reshape:3,       // 展開を左右する効果 = やや強い
     skip:4, draw2:4,                     // 相手を大きく妨害 = 強い
     bind:5, extra:5, prophecy:5          // 複合効果・連続行動・無条件接続 = 最強クラス
   };
 
-  // 左のフチは「凹→フラット→凸」の順で出しやすい(強い)。強力なカードほど自分が
-  // 出しにくくなるよう、パワーが上がるほど凸の確率を増やし、凹の確率を減らす。
-  function leftProbsForPower(power){
-    const t = Math.max(0, Math.min(1, power / MAX_POWER));
-    return {
-      tabProb: 0.05 + t * 0.45,     // 0.05(弱い効果=出しやすい) 〜 0.50(強い効果=出しにくい)
-      socketProb: 0.35 - t * 0.15
-    };
-  }
-  // 右のフチは「凸→フラット→凹」の順で相手が出しづらい(強い)。強力なカードほど
-  // 出した後に相手を邪魔できなくなるよう、パワーが上がるほど凸の確率を減らし、
-  // 凹の確率を増やす(=相手が出しやすくなる)。
-  function rightProbsForPower(power){
-    const t = Math.max(0, Math.min(1, power / MAX_POWER));
-    return {
-      tabProb: 0.50 - t * 0.45,     // 0.50(弱い効果=相手を詰まらせやすい) 〜 0.05(強い効果=相手が出しやすい)
-      socketProb: 0.20 + t * 0.15
-    };
+  // パワー(0〜6)ごとの、左の凹・右の凸の「個数」を決定論的に固定するテーブル。
+  const LEFT_COUNT_BY_POWER  = {0:3, 1:3, 2:2, 3:2, 4:2, 5:1, 6:1};
+  const RIGHT_COUNT_BY_POWER = {0:3, 1:2, 2:2, 3:1, 4:1, 5:1, 6:1};
+
+  // 指定した個数だけ、左なら凹、右なら凸を含む辺を作る。残りはフラット。
+  function sideWithCount(side, count){
+    const fill = (side === 'right') ? 'tab' : 'socket';
+    const positions = [0,1,2];
+    shuffle(positions);
+    const teeth = ['empty','empty','empty'];
+    for(let i=0;i<count;i++) teeth[positions[i]] = fill;
+    return { any:false, teeth };
   }
 
   const NORMAL_KIND_COUNT = 17;
@@ -721,15 +876,22 @@
 
   function buildCardTemplates(){
     const templates = {};
+
     NORMAL_KEYS.forEach(k=>{
-      const lp = leftProbsForPower(NORMAL_POWER), rp = rightProbsForPower(NORMAL_POWER);
-      templates[k] = { left: randomSide(lp.tabProb, lp.socketProb), right: randomSide(rp.tabProb, rp.socketProb) };
+      templates[k] = {
+        left: sideWithCount('left', Math.min(2, LEFT_COUNT_BY_POWER[NORMAL_POWER])),
+        right: sideWithCount('right', Math.min(2, RIGHT_COUNT_BY_POWER[NORMAL_POWER]))
+      };
     });
+
     EFFECT_KEYS.forEach(k=>{
       const power = EFFECT_POWER[k] !== undefined ? EFFECT_POWER[k] : 0;
-      const lp = leftProbsForPower(power), rp = rightProbsForPower(power);
-      templates[k] = { left: randomSide(lp.tabProb, lp.socketProb), right: randomSide(rp.tabProb, rp.socketProb) };
+      templates[k] = {
+        left: sideWithCount('left', LEFT_COUNT_BY_POWER[power]),
+        right: sideWithCount('right', RIGHT_COUNT_BY_POWER[power])
+      };
     });
+
     return templates;
   }
   const CARD_TEMPLATES = buildCardTemplates();
@@ -738,28 +900,16 @@
     const t = CARD_TEMPLATES[kindKey];
     return { id: uid++, type:'normal', kind: kindKey, left: cloneSide(t.left), right: cloneSide(t.right) };
   }
-  // 右のフチは他のカード種と同じくランダムな凸/凹/フラットの組み合わせにするが、
-  // 運悪く「全部フラット(何もない)」になってしまうと見た目が単調になるので、
-  // 少なくとも1か所は凸か凹が入るまで振り直す。
-  // ⭐ワイルドは最強カード(WILD_POWER)として扱うため、rightProbsForPower により
-  // 凸は少なめ・凹は多めになる＝出した直後の相手はつなげやすい「弱い」右フチになる。
-  function randomWildRightSide(){
-    const p = rightProbsForPower(WILD_POWER);
-    let side;
-    do {
-      side = randomSide(p.tabProb, p.socketProb);
-    } while(side.teeth.every(t => t === 'empty'));
-    return side;
-  }
   // 「同じ種類のカードはフチの形がすべて同じ」というルールに合わせ、⭐ワイルドの
   // 2枚も同じ右フチのデザインを共有するよう、テンプレートとして1回だけ生成する。
-  const WILD_RIGHT_TEMPLATE = randomWildRightSide();
+  // ⭐ワイルドは最強カード(WILD_POWER)として扱うため、右フチの凸は0個(全てフラット)に固定。
+  const WILD_RIGHT_TEMPLATE = sideWithCount('right', RIGHT_COUNT_BY_POWER[WILD_POWER]);
 
   function makeWildCard(){
     // 左のフチ: ⭐ どんな相手にも接続できる万能な受け口(any)。ワイルド本来の
     // 特性として、teeth の強弱ルールとは別枠で常に出せる。
-    // 右のフチ: 最強カードの代償として「弱い」形(凹寄り)になっており、出した
-    // 直後の相手はほぼ何でもつなげやすい。
+    // 右のフチ: 最強カードの代償として「弱い」形(凸0個・全フラット)になっており、
+    // 出した直後の相手はほぼ何でもつなげやすい。
     return {
       id: uid++,
       type:'wild',
@@ -771,18 +921,36 @@
     const t = CARD_TEMPLATES[effectKey];
     return { id: uid++, type:'effect', left: cloneSide(t.left), right: cloneSide(t.right), effect: effectKey };
   }
+  // 変幻カード：他のカードと違い固定の形を持たず、手札にある間は毎ターン
+  // フチの形がランダムに変化する(startTurnで再抽選される)。
+  function makeShiftingCard(){
+    return { id: uid++, type:'shifting', left: randomSide('left'), right: randomSide('right') };
+  }
+  function reshapeAllShiftingCards(){
+    (state.order || ['human','cpu']).forEach(pk=>{
+      state.players[pk].hand.forEach(c=>{
+        if(c.type === 'shifting'){
+          c.left = randomSide('left');
+          c.right = randomSide('right');
+        }
+      });
+    });
+  }
 
-  function buildDeck(){
-    const deck = [];
-    const COPIES = 2;
-    NORMAL_KEYS.forEach(k=>{
-      for(let i=0;i<COPIES;i++) deck.push(makeNormalCard(k));
-    });
-    EFFECT_KEYS.forEach(k=>{
-      for(let i=0;i<COPIES;i++) deck.push(makeEffectCard(k));
-    });
-    for(let i=0;i<COPIES;i++) deck.push(makeWildCard());
-    return shuffle(deck);
+  // 山札は無限。1枚1枚を確率で抽選して生成する(全30種類・均等確率)。
+  const ALL_KINDS = NORMAL_KEYS.concat(EFFECT_KEYS).concat(['wild','shifting']);
+  const EFFECT_KEY_SET = new Set(EFFECT_KEYS);
+  const SPECIAL_KINDS = EFFECT_KEYS.concat(['wild','shifting']);
+  // 4人プレイでは対象が複雑になる妨害系(封印/積み荷/束縛/封鎖/予言/分け与え/交換)を除き、
+  // 自分だけで完結する特殊カードのみを許可する。
+  const P4_SPECIAL_KINDS = ['wild','extra','reorganize','reshape','backlash','shifting','skip','draw2','bind','blockade'];
+  function drawRandomCard(){
+    const specialPool = FORCE_NORMAL_ONLY ? P4_SPECIAL_KINDS : SPECIAL_KINDS;
+    const kind = (Math.random() < 0.3) ? choice(NORMAL_KEYS) : choice(specialPool);
+    if(kind === 'wild') return makeWildCard();
+    if(kind === 'shifting') return makeShiftingCard();
+    if(EFFECT_KEY_SET.has(kind)) return makeEffectCard(kind);
+    return makeNormalCard(kind);
   }
 
   function compatibleSides(rightSide, leftSide){
@@ -798,41 +966,58 @@
   // ---------- game state ----------
   let state = null;
 
-  function newGame(){
-    const deck = buildDeck();
-    const startCard = { id:0, type:'start', left:anySide(), right:anySide() };
+  let FORCE_NORMAL_ONLY = false;
 
-    const humanHand = deck.splice(0,7);
-    const cpuHand = deck.splice(0,7);
+  function newGame(numPlayers, normalOnly){
+    numPlayers = numPlayers || 2;
+    FORCE_NORMAL_ONLY = !!normalOnly;
+
+    const order = numPlayers > 2
+      ? ['human','cpu1','cpu2','cpu3']
+      : ['human','cpu'];
+    shuffle(order);
+
+    const startCard = makeNormalCard(choice(NORMAL_KEYS));
+    const players = {};
+    const skipNext = {}, freeConnect = {}, restrictNormalOnly = {}, passStreak = {};
+    order.forEach(k=>{
+      players[k] = { hand: Array.from({length:7}, ()=> drawRandomCard()) };
+      skipNext[k] = false; freeConnect[k] = false; restrictNormalOnly[k] = false; passStreak[k] = 0;
+    });
 
     state = {
-      chain:[startCard], deck,
-      players:{ human:{hand:humanHand}, cpu:{hand:cpuHand} },
-      skipNext:{ human:false, cpu:false },
-      freeConnect:{ human:false, cpu:false },
-      restrictNormalOnly:{ human:false, cpu:false },
+      chain:[startCard],
+      players,
+      order, numPlayers,
+      skipNext, freeConnect, restrictNormalOnly, passStreak,
       activeRestrictNormal:false,
-      current:'human',
+      current: order[0],
       extraTurn:false,
       selectedIdx:null,
       gameOver:false,
       mustDraw:false,
-      thinking:false
+      thinking:false,
+      finishOrder:[],
+      rankAssigned:{}
     };
     render(false);
     logMsg('ゲーム開始！一番右のカードにつなげて、カードを出そう。');
     startTurn();
   }
 
+  function displayName(key){
+    if(key === MY_KEY) return 'あなた';
+    if(state && state.seatIsAI && state.seatIsAI[key] === false) return key.replace('cpu','プレイヤー');
+    if(key === 'cpu' && NET.enabled) return '相手';
+    return key.replace('cpu','CPU');
+  }
+
   function drawCards(playerKey, n){
-    let drawn = 0;
     for(let i=0;i<n;i++){
-      if(state.deck.length === 0){ logMsg('山札が尽きています。'); break; }
-      state.players[playerKey].hand.push(state.deck.shift());
-      drawn++;
+      state.players[playerKey].hand.push(drawRandomCard());
     }
-    if(drawn > 0){
-      showToast('<span class="toast-icon">🂠</span><span>'+label(playerKey)+'が'+drawn+'枚引いた</span>', 'info');
+    if(n > 0){
+      showToast('<span class="toast-icon">🂠</span><span>'+label(playerKey)+'が'+n+'枚引いた</span>', 'info');
     }
   }
 
@@ -873,7 +1058,7 @@
   }
 
   function proceedAfterCpu(playerKey, fn, delay){
-    if(playerKey === 'cpu'){
+    if(playerKey !== MY_KEY){
       setTimeout(fn, delay || 1300);
     } else {
       fn();
@@ -889,6 +1074,7 @@
   function startTurn(){
     if(state.gameOver) return;
     const p = state.current;
+    reshapeAllShiftingCards();
 
     state.activeRestrictNormal = !!state.restrictNormalOnly[p];
     if(state.activeRestrictNormal) state.restrictNormalOnly[p] = false;
@@ -899,12 +1085,12 @@
     if(!movable){
       state.mustDraw = true;
       render(false);
-      if(p === 'cpu'){
+      if(p !== MY_KEY && !NET.enabled){
         state.thinking = true;
         render(false);
         setTimeout(()=>{
           state.thinking = false;
-          performForcedDraw('cpu');
+          performForcedDraw(p);
         }, 1300);
       }
       return;
@@ -912,13 +1098,24 @@
     state.mustDraw = false;
     state.selectedIdx = null;
     render(false);
-    if(p === 'cpu'){
+    if(p !== MY_KEY && !NET.enabled){
       cpuTakeTurn();
     }
   }
 
   function performForcedDraw(playerKey){
-    drawCards(playerKey, 1);
+    state.passStreak[playerKey]++;
+    if(state.passStreak[playerKey] >= 1){
+      let card = null;
+      for(let tries=0; tries<20; tries++){
+        const c = drawRandomCard();
+        if(compatibleSides(lastCard().right, c.left)){ card = c; break; }
+      }
+      state.players[playerKey].hand.push(card || drawRandomCard());
+    } else {
+      state.players[playerKey].hand.push(drawRandomCard());
+    }
+    showToast('<span class="toast-icon">🂠</span><span>'+label(playerKey)+'が1枚引いた</span>', 'info');
     logMsg('<b>'+label(playerKey)+'</b> は出せるカードがなく、山札から1枚引いた。');
     state.mustDraw = false;
     render(false);
@@ -933,16 +1130,25 @@
       state.extraTurn = false;
       return;
     }
-    let np = other(state.current);
-    if(state.skipNext[np]){
-      state.skipNext[np] = false;
-      logMsg('<b>'+label(np)+'</b> のターンは封印され、1回休みになった！');
-      np = other(np);
+    const ord = state.order;
+    let idx = ord.indexOf(state.current);
+    for(let guard=0; guard<ord.length; guard++){
+      idx = (idx + 1) % ord.length;
+      const candidate = ord[idx];
+      if(state.rankAssigned && state.rankAssigned[candidate]) continue;
+      if(state.skipNext[candidate]){
+        state.skipNext[candidate] = false;
+        logMsg('<b>'+label(candidate)+'</b> のターンは封印され、1回休みになった！');
+        continue;
+      }
+      state.current = candidate;
+      return;
     }
-    state.current = np;
+    state.current = ord[(ord.indexOf(state.current) + 1) % ord.length];
   }
 
   function playCard(playerKey, handIdx){
+    state.passStreak[playerKey] = 0;
     const wasProphecy = !!state.freeConnect[playerKey];
     if(wasProphecy) state.freeConnect[playerKey] = false;
 
@@ -952,9 +1158,24 @@
     state.chain.push(card);
     state.selectedIdx = null;
 
+    if(card.type === 'effect' && card.effect === 'backlash'){
+      const eff = EFFECTS.backlash;
+      showToast('<span class="toast-icon">'+eff.icon+'</span><span>'+label(playerKey)+'の「'+eff.label+'」発動！</span>', 'danger');
+      showEffectBurst(eff.icon, eff.label + ' 発動！', 'danger');
+      drawCards(playerKey, 2);
+      logMsg('<b>'+label(playerKey)+'</b> がカードを右につなげた。 '+eff.icon+'「'+eff.label+'」発動！ '+label(playerKey)+'自身が山札から2枚引くことになった…！（最後の1枚でも、これで勝利にはならない）');
+      render(true);
+      proceedAfterCpu(playerKey, ()=>{
+        advanceTurn();
+        startTurn();
+      });
+      return;
+    }
+
     if(hand.length === 0){
       render(true);
-      endGame(playerKey);
+      if(state.numPlayers > 2){ finishPlayer(playerKey); }
+      else { endGame(playerKey); }
       return;
     }
 
@@ -1039,7 +1260,7 @@
 
   function applyEffect(card, actor){
     const eff = EFFECTS[card.effect];
-    const opp = other(actor);
+    const opp = nextSeat(actor);
     const toastCls = EFFECT_TONE[card.effect] || 'good';
     showToast('<span class="toast-icon">'+eff.icon+'</span><span>'+label(actor)+'の「'+eff.label+'」発動！</span>', toastCls);
     showEffectBurst(eff.icon, eff.label + ' 発動！', toastCls);
@@ -1070,40 +1291,12 @@
         state.freeConnect[actor] = true;
         extra += ' '+label(actor)+'の次のターンは、どんなカードでも接続できる。';
         break;
-      case 'backlash':
-        drawCards(actor, 2);
-        extra += ' '+label(actor)+'自身が山札から2枚引くことになった…！';
-        break;
-      case 'reroll': {
-        const oppHand = state.players[opp].hand;
-        if(oppHand.length && state.deck.length){
-          const i = rand(oppHand.length);
-          const returned = oppHand.splice(i,1)[0];
-          state.deck.push(returned);
-          shuffle(state.deck);
-          oppHand.push(state.deck.shift());
-          extra += ' '+label(opp)+'の手札を1枚山札に戻し、新しく1枚引かせた。';
-        } else {
-          extra += ' しかし入れ替えは不発に終わった。';
-        }
-        break;
-      }
-      case 'foresight': {
-        if(state.deck.length){
-          const topN = state.deck.slice(0, Math.min(2, state.deck.length));
-          const list = topN.map(c => c.type==='wild' ? '⭐万能' : (c.type==='effect' ? EFFECTS[c.effect].icon+EFFECTS[c.effect].label : 'ノーマル')).join('、');
-          extra += ' 山札の上から'+topN.length+'枚を確認した：'+list;
-        } else {
-          extra += ' しかし山札は空だった。';
-        }
-        break;
-      }
     }
     return extra;
   }
 
   function runGiftEffect(actor, onComplete){
-    const opp = other(actor);
+    const opp = nextSeat(actor);
     function finish(idx){
       const hand = state.players[actor].hand;
       if(hand.length && idx != null){
@@ -1112,9 +1305,10 @@
         logMsg('<b>'+label(actor)+'</b>が手札を1枚選び、<b>'+label(opp)+'</b>に渡した！');
         showToast('<span class="toast-icon">🎁</span><span>'+label(actor)+'が1枚押し付けた！</span>', 'good');
         if(hand.length === 0){
-          // 分け与えで最後の1枚を渡した = 自分の手札が0枚になった時点で勝利。
-          // 通常の進行(次のターンへ)には進まず、そのままゲームを終了させる。
-          endGame(actor);
+          // 分け与えで最後の1枚を渡した = 自分の手札が0枚になった時点で勝利(4人プレイでは順位確定)。
+          // 通常の進行(onComplete経由の次のターンへ)には進まず、ここで終える。
+          if(state.numPlayers > 2){ finishPlayer(actor); }
+          else { endGame(actor); }
           return;
         }
       } else {
@@ -1124,6 +1318,8 @@
     }
     if(actor === 'human'){
       openCardPicker('human', '🎁 カードを渡す', '<b>あなたの番</b>：相手に渡すカードを1枚選んでください（自分の手札が1枚減ります）。', finish);
+    } else if(NET.enabled){
+      requestRemotePick(actor, '🎁 カードを渡す', '<b>あなたの番</b>：相手に渡すカードを1枚選んでください（自分の手札が1枚減ります）。', false, finish);
     } else {
       showToast('<span class="toast-icon">🎁</span><span>CPUが渡すカードを選んでいる…</span>', 'info');
       setTimeout(()=>{
@@ -1143,15 +1339,10 @@
         if(i >= 0 && i < hand.length) returned.push(hand.splice(i,1)[0]);
       });
       if(returned.length){
-        returned.forEach(c=> state.deck.push(c));
-        shuffle(state.deck);
-        let drawn = 0;
         for(let i=0;i<returned.length;i++){
-          if(state.deck.length === 0) break;
-          hand.push(state.deck.shift());
-          drawn++;
+          hand.push(drawRandomCard());
         }
-        logMsg('<b>'+label(actor)+'</b>が手札を'+returned.length+'枚山札に戻し、'+drawn+'枚引き直した。');
+        logMsg('<b>'+label(actor)+'</b>が手札を'+returned.length+'枚山札に戻し、'+returned.length+'枚引き直した。');
         showToast('<span class="toast-icon">🧹</span><span>'+label(actor)+'が手札を整理した！</span>', 'good');
       } else {
         logMsg('<b>'+label(actor)+'</b>は手札を整理しなかった。');
@@ -1164,12 +1355,14 @@
         '<b>あなたの番</b>：山札に戻したいカードを好きな枚数選んでください（0枚でもOK）。選び終わったら「決定」を押してください。',
         finish, {multi:true}
       );
+    } else if(NET.enabled){
+      requestRemotePick(actor, '🧹 手札整理タイム', '<b>あなたの番</b>：山札に戻したいカードを好きな枚数選んでください（0枚でもOK）。選び終わったら「決定」を押してください。', true, finish);
     } else {
-      showToast('<span class="toast-icon">🧹</span><span>CPUが手札を整理している…</span>', 'info');
+      showToast('<span class="toast-icon">🧹</span><span>'+label(actor)+'が手札を整理している…</span>', 'info');
       setTimeout(()=>{
-        const hand = state.players.cpu.hand;
+        const hand = state.players[actor].hand;
         const deadIdxs = [];
-        hand.forEach((c,i)=>{ if(!canPlace(c,'cpu')) deadIdxs.push(i); });
+        hand.forEach((c,i)=>{ if(!canPlace(c,actor)) deadIdxs.push(i); });
         finish(deadIdxs.slice(0,3));
       }, 1100);
     }
@@ -1180,8 +1373,8 @@
       const hand = state.players[actor].hand;
       if(hand.length && idx != null && hand[idx] && hand[idx].type !== 'wild'){
         const card = hand[idx];
-        card.left = randomSide();
-        card.right = randomSide();
+        card.left = randomSide('left');
+        card.right = randomSide('right');
         delete card.kind;
         logMsg('<b>'+label(actor)+'</b>が手札のカードのフチを新しく変化させた！');
         showToast('<span class="toast-icon">🔧</span><span>'+label(actor)+'がカードを変形させた！</span>', 'good');
@@ -1192,18 +1385,20 @@
     }
     if(actor === 'human'){
       openCardPicker('human', '🔧 カード変形', '<b>あなたの番</b>：フチの形を変えたいカードを1枚選んでください。', finish);
+    } else if(NET.enabled){
+      requestRemotePick(actor, '🔧 カード変形', '<b>あなたの番</b>：フチの形を変えたいカードを1枚選んでください。', false, finish);
     } else {
-      showToast('<span class="toast-icon">🔧</span><span>CPUがカードを変形させている…</span>', 'info');
+      showToast('<span class="toast-icon">🔧</span><span>'+label(actor)+'がカードを変形させている…</span>', 'info');
       setTimeout(()=>{
-        const hand = state.players.cpu.hand;
-        const deadIdx = hand.findIndex(c => !canPlace(c, 'cpu') && c.type !== 'wild');
+        const hand = state.players[actor].hand;
+        const deadIdx = hand.findIndex(c => !canPlace(c, actor) && c.type !== 'wild');
         finish(deadIdx !== -1 ? deadIdx : rand(hand.length));
       }, 1100);
     }
   }
 
   function runSwapSequence(actor, onComplete){
-    const opp = other(actor);
+    const opp = nextSeat(actor);
     const picks = {};
 
     function cpuPick(playerKey){
@@ -1217,6 +1412,8 @@
       if(hand.length === 0){ picks[playerKey] = null; next(); return; }
       if(playerKey === 'human'){
         openCardPicker('human', '🔀 カード交換タイム', '<b>あなたの番</b>：相手に渡すカードを1枚選んでください。', (idx)=>{ picks[playerKey] = idx; next(); });
+      } else if(NET.enabled){
+        requestRemotePick(playerKey, '🔀 カード交換タイム', '<b>あなたの番</b>：相手に渡すカードを1枚選んでください。', false, (idx)=>{ picks[playerKey] = idx; next(); });
       } else {
         showToast('<span class="toast-icon">🔀</span><span>CPUが渡すカードを選んでいる…</span>', 'info');
         setTimeout(()=>{
@@ -1303,7 +1500,7 @@
       wrap.appendChild(inner);
       const tag = document.createElement('div');
       tag.className = 'effect-tag';
-      tag.textContent = card.type === 'wild' ? '万能' : (card.type === 'effect' ? EFFECTS[card.effect].label : '\u00A0');
+      tag.textContent = card.type === 'wild' ? '万能' : (card.type === 'shifting' ? '変幻' : (card.type === 'effect' ? EFFECTS[card.effect].label : '\u00A0'));
       wrap.appendChild(tag);
       if(multi){
         inner.addEventListener('click', ()=>{
@@ -1319,33 +1516,77 @@
 
   function endGame(winner){
     state.gameOver = true;
+    state.winner = winner;
     render(true);
+  }
+
+  // 4人プレイ用: 1人が手札を出し切っても即終了せず、順位を記録して続行する。
+  // 残りが1人になったら、その人を最下位として自動確定しゲーム終了。
+  function finishPlayer(seat){
+    state.finishOrder.push(seat);
+    state.rankAssigned[seat] = true;
+    const remaining = state.order.filter(s => !state.rankAssigned[s]);
+    if(remaining.length <= 1){
+      if(remaining.length === 1){
+        state.finishOrder.push(remaining[0]);
+        state.rankAssigned[remaining[0]] = true;
+      }
+      state.gameOver = true;
+      state.winner = state.finishOrder[0];
+      render(true);
+      return;
+    }
+    logMsg('<b>'+label(seat)+'</b> が手札を出し切り、'+state.finishOrder.length+'位が確定した！');
+    render(false);
+    proceedAfterCpu(seat, ()=>{
+      advanceTurn();
+      startTurn();
+    });
+  }
+
+  function renderWinModalIfNeeded(){
     const overlay = document.getElementById('winOverlay');
+    if(!state.gameOver){ overlay.classList.add('hidden'); return; }
     overlay.classList.remove('hidden');
-    document.getElementById('winEmoji').textContent = winner === 'human' ? '🎉' : '💤';
-    document.getElementById('winTitle').textContent = winner === 'human' ? 'あなたの勝ち！' : 'CPUの勝ち…';
-    document.getElementById('winDesc').textContent = winner === 'human'
+    if(state.numPlayers > 2 && state.finishOrder && state.finishOrder.length){
+      const iWon = state.winner === MY_KEY;
+      document.getElementById('winEmoji').textContent = iWon ? '🎉' : '🏁';
+      document.getElementById('winTitle').textContent = '最終順位';
+      const lines = state.finishOrder.map((seat,i)=>{
+        const rank = i+1;
+        const medal = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'　';
+        return medal+' '+rank+'位: '+displayName(seat);
+      });
+      document.getElementById('winDesc').innerHTML = lines.join('<br>');
+      return;
+    }
+    const iWon = state.winner === MY_KEY;
+    const winnerName = displayName(state.winner);
+    document.getElementById('winEmoji').textContent = iWon ? '🎉' : '💤';
+    document.getElementById('winTitle').textContent = iWon ? 'あなたの勝ち！' : (winnerName+'の勝ち…');
+    document.getElementById('winDesc').textContent = iWon
       ? '手札をすべて出し切りました。お見事！'
-      : 'CPUに手札を先に出し切られてしまいました。';
+      : (winnerName+'に手札を先に出し切られてしまいました。');
   }
 
   // ---------- CPU AI ----------
   function cpuTakeTurn(){
+    const actingKey = state.current;
     state.thinking = true;
     render(false);
     setTimeout(()=>{
       state.thinking = false;
-      const hand = state.players.cpu.hand;
+      const hand = state.players[actingKey].hand;
       const options = [];
       hand.forEach((card, idx)=>{
-        if(canPlace(card, 'cpu')) options.push({idx, card});
+        if(canPlace(card, actingKey)) options.push({idx, card});
       });
       if(options.length === 0){
-        performForcedDraw('cpu');
+        performForcedDraw(actingKey);
         return;
       }
       const chosen = chooseCpuOption(options);
-      playCard('cpu', chosen.idx);
+      playCard(actingKey, chosen.idx);
     }, 1500);
   }
 
@@ -1410,6 +1651,11 @@
       badge.className = 'center-badge';
       badge.textContent = '⭐';
       wrap.appendChild(badge);
+    } else if(card.type === 'shifting'){
+      const badge = document.createElement('div');
+      badge.className = 'center-badge';
+      badge.textContent = '🌀';
+      wrap.appendChild(badge);
     }
     return wrap;
   }
@@ -1421,15 +1667,21 @@
     renderHumanHand();
     renderCpuHand();
     updateEffectInfoBar();
+    renderWinModalIfNeeded();
+    broadcastState();
   }
 
   function updateEffectInfoBar(){
     const bar = document.getElementById('effectInfoBar');
-    if(state.current === 'human' && !state.gameOver && state.selectedIdx !== null){
-      const card = state.players.human.hand[state.selectedIdx];
+    if(state.current === MY_KEY && !state.gameOver && state.selectedIdx !== null){
+      const card = state.players[MY_KEY].hand[state.selectedIdx];
       if(card.type === 'wild'){
         bar.style.display = 'flex';
         bar.innerHTML = '<span class="effect-info-icon">⭐</span><div><b>万能カード</b><br><span class="desc">左のフチはどんな相手にも接続できます。ただし最強カードの代償として右のフチは凹寄りの弱い形で、出した直後の相手はつなげやすくなります。</span></div>';
+        return;
+      } else if(card.type === 'shifting'){
+        bar.style.display = 'flex';
+        bar.innerHTML = '<span class="effect-info-icon">🌀</span><div><b>変幻</b><br><span class="desc">手札にある間、毎ターンフチの形がランダムに変わります。</span></div>';
         return;
       } else if(card.type === 'effect'){
         const eff = EFFECTS[card.effect];
@@ -1446,29 +1698,28 @@
     if(state.gameOver){
       turnLabel.textContent = 'ゲーム終了';
       turnLabel.className = 'turn';
-    } else if(state.thinking && state.current === 'cpu'){
-      turnLabel.innerHTML = 'CPU が考え中<span class="thinking"><span class="dotpulse"></span><span class="dotpulse" style="animation-delay:.2s"></span><span class="dotpulse" style="animation-delay:.4s"></span></span>';
+    } else if(state.thinking && state.current !== MY_KEY){
+      turnLabel.innerHTML = displayName(state.current)+' が考え中<span class="thinking"><span class="dotpulse"></span><span class="dotpulse" style="animation-delay:.2s"></span><span class="dotpulse" style="animation-delay:.4s"></span></span>';
       turnLabel.className = 'turn cpu';
     } else {
-      turnLabel.textContent = state.current === 'human' ? 'あなたのターン' : 'CPU のターン';
-      turnLabel.className = 'turn ' + state.current;
+      turnLabel.textContent = state.current === MY_KEY ? 'あなたのターン' : (displayName(state.current)+' のターン');
+      turnLabel.className = 'turn ' + (state.current === MY_KEY ? 'human' : 'cpu');
     }
-    document.getElementById('deckCount').textContent = '山札: ' + state.deck.length + '枚';
-    document.getElementById('humanHandCount').textContent = state.players.human.hand.length + '枚';
-    document.getElementById('cpuHandCount').textContent = state.players.cpu.hand.length + '枚';
+    document.getElementById('deckCount').textContent = '山札: ∞';
+    document.getElementById('humanHandCount').textContent = state.players[MY_KEY].hand.length + '枚';
 
     const drawBtn = document.getElementById('drawBtn');
     const hint = document.getElementById('hintMsg');
     if(state.gameOver){
       drawBtn.style.display = 'none';
       hint.textContent = '';
-    } else if(state.current === 'human' && state.mustDraw){
+    } else if(state.current === MY_KEY && state.mustDraw){
       drawBtn.style.display = 'inline-block';
       drawBtn.disabled = false;
       hint.textContent = '出せるカードがありません。';
     } else {
       drawBtn.style.display = 'none';
-      if(state.current === 'human'){
+      if(state.current === MY_KEY){
         hint.textContent = state.activeRestrictNormal
           ? '🚧封鎖中：ノーマルカードしか出せません！'
           : 'カードを選んで、右の枠（緑）をタップしよう。';
@@ -1490,7 +1741,7 @@
       if(isNewest){
         el.classList.add('enter');
         el.classList.add('just-placed');
-        el.classList.add(card.playedBy === 'cpu' ? 'by-cpu' : 'by-human');
+        el.classList.add(card.playedBy === MY_KEY ? 'by-human' : 'by-cpu');
         setTimeout(()=>{ el.classList.remove('just-placed'); }, 700);
       }
       cardEls.push(el);
@@ -1518,16 +1769,16 @@
     row.appendChild(arrow);
 
     const slot = document.createElement('div');
-    const selectedCard = (state.current === 'human' && state.selectedIdx !== null && !state.gameOver)
-      ? state.players.human.hand[state.selectedIdx] : null;
+    const selectedCard = (state.current === MY_KEY && state.selectedIdx !== null && !state.gameOver)
+      ? state.players[MY_KEY].hand[state.selectedIdx] : null;
 
     if(selectedCard){
-      if(canPlace(selectedCard, 'human')){
+      if(canPlace(selectedCard, MY_KEY)){
         slot.className = 'slot valid';
         slot.textContent = 'ここに配置';
         slot.addEventListener('click', ()=>{
-          if(state.current !== 'human' || state.gameOver || state.selectedIdx === null) return;
-          playCard('human', state.selectedIdx);
+          if(state.current !== MY_KEY || state.gameOver || state.selectedIdx === null) return;
+          localPlayOrRequest(state.selectedIdx);
         });
       } else {
         slot.className = 'slot invalid';
@@ -1543,7 +1794,7 @@
   function renderHumanHand(){
     const row = document.getElementById('humanHandRow');
     row.innerHTML = '';
-    const hand = state.players.human.hand;
+    const hand = state.players[MY_KEY].hand;
     hand.forEach((card, idx)=>{
       const wrap = document.createElement('div');
       wrap.className = 'hand-card-wrap';
@@ -1557,11 +1808,11 @@
 
       const tag = document.createElement('div');
       tag.className = 'effect-tag';
-      tag.textContent = card.type === 'wild' ? '万能' : (card.type === 'effect' ? EFFECTS[card.effect].label : '\u00A0');
+      tag.textContent = card.type === 'wild' ? '万能' : (card.type === 'shifting' ? '変幻' : (card.type === 'effect' ? EFFECTS[card.effect].label : '\u00A0'));
       wrap.appendChild(tag);
 
       inner.addEventListener('click', ()=>{
-        if(state.gameOver || state.current !== 'human' || state.mustDraw) return;
+        if(state.gameOver || state.current !== MY_KEY || state.mustDraw) return;
         state.selectedIdx = (state.selectedIdx === idx) ? null : idx;
         render(false);
       });
@@ -1571,53 +1822,78 @@
   }
 
   function renderCpuHand(){
-    const row = document.getElementById('cpuHandRow');
-    row.innerHTML = '';
-    const n = state.players.cpu.hand.length;
-    for(let i=0;i<n;i++){
-      const back = document.createElement('div');
-      back.className = 'cardback';
-      row.appendChild(back);
-    }
-  }
-
-  // ---------- tutorial example ----------
-  function buildTutorialExample(){
-    const holder = document.getElementById('tutorialExample');
-    holder.innerHTML = '';
-    const cardA = { type:'normal', left:{any:false, teeth:['empty','empty','empty']}, right:{any:false, teeth:['tab','empty','empty']} };
-    const cardB = { type:'normal', left:{any:false, teeth:['socket','empty','empty']}, right:{any:false, teeth:['empty','empty','empty']} };
-    const elA = buildCardEl(cardA, {w:56,h:76});
-    const elB = buildCardEl(cardB, {w:56,h:76});
-    elA.querySelectorAll('.tooth[data-side="right"]').forEach(t=>t.classList.add('connected'));
-    elB.querySelectorAll('.tooth[data-side="left"]').forEach(t=>t.classList.add('connected'));
-    const arrow = document.createElement('div');
-    arrow.style.color = 'var(--good)';
-    arrow.style.fontWeight = '700';
-    arrow.textContent = '接続 OK →';
-    holder.appendChild(elA);
-    holder.appendChild(arrow);
-    holder.appendChild(elB);
+    const container = document.getElementById('oppHandsContainer');
+    container.innerHTML = '';
+    const opponents = (state.order || ['human','cpu']).filter(k => k !== MY_KEY);
+    opponents.forEach(key=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'hand-section';
+      wrap.style.padding = '8px 10px';
+      wrap.style.marginBottom = '6px';
+      const isTurn = state.current === key && !state.gameOver;
+      const h3 = document.createElement('h3');
+      h3.innerHTML = '<span>'+displayName(key)+(isTurn ? ' ●':'')+'</span><span>'+state.players[key].hand.length+'枚</span>';
+      wrap.appendChild(h3);
+      const row = document.createElement('div');
+      row.className = 'opp-hand-row';
+      const n = state.players[key].hand.length;
+      for(let i=0;i<n;i++){
+        const back = document.createElement('div');
+        back.className = 'cardback';
+        row.appendChild(back);
+      }
+      wrap.appendChild(row);
+      container.appendChild(wrap);
+    });
   }
 
   // ---------- events ----------
-  document.getElementById('helpBtn').addEventListener('click', ()=>{
-    document.getElementById('tutorialOverlay').classList.remove('hidden');
-  });
-  document.getElementById('tutorialCloseBtn').addEventListener('click', ()=>{
-    document.getElementById('tutorialOverlay').classList.add('hidden');
-  });
   document.getElementById('drawBtn').addEventListener('click', ()=>{
-    if(state.current !== 'human' || !state.mustDraw || state.gameOver) return;
-    performForcedDraw('human');
+    if(state.current !== MY_KEY || !state.mustDraw || state.gameOver) return;
+    localDrawOrRequest();
   });
   document.getElementById('restartBtn').addEventListener('click', ()=>{
     document.getElementById('winOverlay').classList.add('hidden');
-    newGame();
+    if(NET.enabled){ location.reload(); }
+    else { newGame(state.numPlayers, FORCE_NORMAL_ONLY); }
   });
 
-  buildTutorialExample();
-  newGame();
+  document.getElementById('modeCpuMainBtn').addEventListener('click', ()=>{
+    document.getElementById('modeOverlay').classList.add('hidden');
+    document.getElementById('cpuCountOverlay').classList.remove('hidden');
+  });
+  document.getElementById('modeOnlineMainBtn').addEventListener('click', ()=>{
+    document.getElementById('modeOverlay').classList.add('hidden');
+    document.getElementById('onlineCountOverlay').classList.remove('hidden');
+  });
+  document.getElementById('cpu2pBtn').addEventListener('click', ()=>{
+    MY_KEY='human'; OPP_KEY='cpu'; NET.enabled=false;
+    document.getElementById('cpuCountOverlay').classList.add('hidden');
+    newGame(2, false);
+  });
+  document.getElementById('cpu4pBtn').addEventListener('click', ()=>{
+    MY_KEY='human'; OPP_KEY='cpu'; NET.enabled=false;
+    document.getElementById('cpuCountOverlay').classList.add('hidden');
+    newGame(4, true);
+  });
+  document.getElementById('online2pBtn').addEventListener('click', ()=>{
+    NET.desiredCount = 2;
+    document.getElementById('onlineCountOverlay').classList.add('hidden');
+    document.getElementById('onlineOverlay').classList.remove('hidden');
+  });
+  document.getElementById('online4pBtn').addEventListener('click', ()=>{
+    NET.desiredCount = 4;
+    document.getElementById('onlineCountOverlay').classList.add('hidden');
+    document.getElementById('onlineOverlay').classList.remove('hidden');
+  });
+  document.getElementById('onlineConnectBtn').addEventListener('click', ()=>{
+    const val = document.getElementById('passphraseInput').value;
+    if(!val || !val.trim()){ document.getElementById('onlineStatus').textContent = '合言葉を入力してください。'; return; }
+    startOnlineMatch(val);
+  });
+  document.getElementById('lobbyStartBtn').addEventListener('click', ()=>{
+    hostStartGame();
+  });
 })();
 </script>
 </body>
